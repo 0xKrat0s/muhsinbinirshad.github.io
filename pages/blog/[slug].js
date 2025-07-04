@@ -6,7 +6,13 @@ import BlogPost from '../../components/BlogPost';
 
 export async function getStaticPaths() {
   const blogDir = path.join(process.cwd(), 'blog');
-  const files = fs.readdirSync(blogDir).filter(f => f.endsWith('.md'));
+  let files = [];
+  try {
+    files = fs.readdirSync(blogDir).filter(f => f.endsWith('.md'));
+  } catch (err) {
+    // Directory does not exist, return no paths
+    return { paths: [], fallback: false };
+  }
   const paths = files.map(filename => ({
     params: { slug: filename.replace(/\.md$/, '') },
   }));
@@ -17,12 +23,20 @@ export async function getStaticProps({ params }) {
   try {
     const blogDir = path.join(process.cwd(), 'blog');
     const filePath = path.join(blogDir, `${params.slug}.md`);
+    if (!fs.existsSync(filePath)) {
+      return { notFound: true };
+    }
     const fileContent = fs.readFileSync(filePath, 'utf-8');
     const { data, content } = matter(fileContent);
     const html = marked(content);
     
     // Get all blog posts for related posts
-    const files = fs.readdirSync(blogDir).filter(f => f.endsWith('.md'));
+    let files = [];
+    try {
+      files = fs.readdirSync(blogDir).filter(f => f.endsWith('.md'));
+    } catch (err) {
+      files = [];
+    }
     const relatedPosts = files
       .filter(filename => filename !== `${params.slug}.md`)
       .slice(0, 3)
