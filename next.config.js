@@ -6,6 +6,10 @@ const nextConfig = {
     unoptimized: true,
   },
   trailingSlash: true,
+
+  // 👇 ADD THESE TWO LINES
+  basePath: '/muhsinbinirshad.github.io',
+  assetPrefix: '/muhsinbinirshad.github.io/',
 };
 
 module.exports = nextConfig;
